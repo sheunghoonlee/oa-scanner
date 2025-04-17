@@ -1,0 +1,96 @@
+# .cursorrules - 네트워크 스캐너 개발 가이드라인 (Updated)
+
+## --- Project Context ---
+[Context: Overview]
+Project is an offline, unauthenticated network scanning system designed for beginners. Uses Python 3.10+, PyQt5/PySide6, Nmap CLI (via subprocess), openpyxl, pandas, configparser. Deployed as a standalone executable via PyInstaller for Windows/Linux. Development timeline: 8 weeks, using Cursor AI. Target user: Coding beginner (prioritize simple code, avoid complex features).
+
+[Context: PRD Reference]
+Strictly adhere to PRD v1.3 requirements. PRD document located at .cursor/docs/prd.md.
+
+## --- 1. 코드 구조 원칙 ---
+[Rule: File Length]
+Check if file length exceeds 700 lines. Suggest splitting into smaller modules (e.g., ui.py, scanner.py, utils.py) if exceeded.
+
+[Rule: Function Length]
+Check if function length exceeds 50 lines. Suggest refactoring into smaller functions.
+
+[Rule: Nested If Depth]
+Check for nested if statements exceeding 3 levels deep. Suggest simplification strategies (e.g., Guard Clauses, function extraction).
+
+[Rule: Cyclomatic Complexity]
+Check if function cyclomatic complexity exceeds 10. Suggest refactoring to reduce complexity. Use `radon cc file.py` to measure complexity.
+
+## --- 2. 모듈화 원칙 ---
+[Guideline: Modularity - SRP]
+Enforce the Single Responsibility Principle for classes and functions. Explain SRP if violated and suggest splitting (e.g., UI logic in ui.py, scan logic in scanner.py).
+
+[Guideline: Modularity - Cohesion & Coupling]
+Promote high cohesion and low coupling in modules and classes. Explain these concepts and ensure related functions are grouped (e.g., Nmap functions in scanner.py, independent of UI).
+
+[Guideline: Modularity - Reusability & DI]
+Design reusable components and use Dependency Injection to reduce coupling. Suggest applying DI (e.g., passing config object to functions).
+
+## --- 3. 보안 코딩 표준 ---
+[Guideline: Security - Input Validation (KISA)]
+Always validate and sanitize external inputs (config files, user input, command outputs). Check for type, length, allowed characters (e.g., validate network CIDR, license key format).
+
+[Guideline: Security - Secure Functions (KISA)]
+Avoid insecure functions like eval, exec, or subprocess with shell=True. If used, ensure rigorous validation (e.g., use `subprocess.run(["nmap", "-T1", network], shell=False)`).
+
+[Guideline: Security - Time and State (KISA)]
+Ensure atomic operations for state management (e.g., use temporary files when saving `scan_state.json` to prevent corruption).
+
+[Guideline: Security - Error Handling (KISA)]
+Log errors securely without exposing sensitive information. Implement proper exception handling (e.g., avoid exposing system paths in error messages).
+
+[Guideline: Security - Encapsulation (KISA)]
+Encapsulate sensitive data (e.g., license key, scan state) and restrict external access (e.g., use `self._license_key` with getter/setter).
+
+[Guideline: Security - API Misuse (KISA)]
+Ensure proper API usage (e.g., pass `subprocess.run` arguments as a list, validate user inputs to prevent injection).
+
+[Guideline: Security - Cryptography (OWASP)]
+Use standard, secure libraries for cryptography. Avoid weak algorithms (MD5, SHA1) and custom implementations. Use strong hashing (SHA-256+) with salt for stored secrets (e.g., license key hashing).
+
+[Guideline: Security - Logging (ISO 27001)]
+Log security-relevant events appropriately (e.g., license validation, scan start/stop, errors). Avoid logging sensitive data like passwords. Refer to .cursor/templates/log_format.txt for log format.
+
+[Guideline: Security - Access Control (OWASP)]
+Restrict critical operations (e.g., starting scan, generating reports) to occur only after license key validation.
+
+[Guideline: Security - Integrity (OWASP)]
+Validate the integrity of state files (e.g., `scan_state.json`) on load. Handle parsing errors and initialize defaults if corrupted.
+
+[Guideline: Security - Dependencies (OWASP)]
+Check dependencies for known vulnerabilities regularly (e.g., using pip-audit) and keep them updated.
+
+[Guideline: Security - Vulnerability Management (ISO 27001)]
+Avoid vulnerable Nmap scripts (e.g., `--script vuln`). Use only safe scripts specified in PRD (e.g., smb-protocols, http-server-header).
+
+## --- 4. 디버깅 원칙 ---
+[Guideline: Debugging - Logging]
+Prioritize using the standard `logging` module over print statements for debugging. Use appropriate log levels and consistent formatting. Refer to .cursor/templates/log_format.txt.
+
+[Guideline: Debugging - Error Messages]
+Standardize error messages: user-friendly messages for UI, detailed messages for logs. Refer to .cursor/templates/error_format.txt.
+
+[Guideline: Debugging - Step-by-Step Process]
+Break down complex logic into smaller steps for debugging. Log each step to trace issues.
+
+[Guideline: Debugging - Automated Tests]
+Write automated test cases for critical functions (e.g., license validation, Nmap parsing) to improve debugging efficiency. Refer to .cursor/templates/test_template.py.
+
+## --- 5. 코드 품질 관리 ---
+[Guideline: Quality - Linter/Formatter]
+Adhere to configured Pylint, Flake8, and Black rules. Refer to .cursor/configs/flake8.ini, .cursor/configs/pylint.rc, .cursor/configs/black.toml.
+
+[Guideline: Quality - Testing]
+Write unit tests for critical logic and utility functions. Aim for >= 80% test coverage using pytest and pytest-cov (e.g., `pytest --cov=. --cov-report=html`).
+
+## --- 6. 추가 가이드라인 ---
+[Guideline: Beginner-Friendly Code]
+Generate beginner-friendly code. Avoid complex Python features (e.g., decorators, metaclasses) and prioritize readability.
+
+[Guideline: Comments]
+Add clear comments to each function/class explaining its purpose and usage.
+

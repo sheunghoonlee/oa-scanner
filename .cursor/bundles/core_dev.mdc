@@ -1,0 +1,4 @@
+!include ../docs/prd.md
+!include ../docs/uipo_requirements.md
+!include ../docs/functional_specs.md
+!include ../rules/.cursorrules
